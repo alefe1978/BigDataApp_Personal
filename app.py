@@ -32,8 +32,9 @@ if not mongo_uri:
     #uri = "mongodb+srv://DbCentral:DbCentral2025@cluster0.vhltza7.mongodb.net/?appName=Cluster0"
     #uri         = "mongodb+srv://ambiente:BdIaGtA25_@cluster0.xjrq8tt.mongodb.net/administracion?retryWrites=true&w=majority"
     # mongodb+srv://DbCentral:DbCentral2025@cluster0.vhltza7.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0"
-    uri         = "mongodb+srv://dbambiente:dbambiente@cluster0.xjrq8tt.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0"
-    mongo_uri   = uri BdIaGta25_
+    #uri         = "mongodb+srv://dbambiente:dbambiente@cluster0.xjrq8tt.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0"
+    uri = "mongodb+srv://dbambiente:dbambiente@cluster0.xjrq8tt.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0"
+    mongo_uri   = uri
 
 # Función para conectar a MongoDB
 def connect_mongo():
