@@ -27,6 +27,14 @@
 
     <div class="container">
         <h1 class="text-center mb-4">Contactar</h1>
+
+#Muestra mensajes de error o éxito 
+         {% if error_message %}
+            <div class="alert alert-danger">{{ error_message }}</div>
+        {% endif %}
+        {% if success_message %}
+             <div class="alert alert-success">{{ success_message }}</div>
+        {% endif %}
         
         <form method="POST" action="/contacto" class="col-md-8 mx-auto">
             <div class="mb-3">
