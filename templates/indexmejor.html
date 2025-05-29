@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BigData-MiProyecto - Inicio</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
+    
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    
+    </head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark fixed-top">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="{{ url_for('index') }}">
+                BigData-MiProyecto
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNavMain" aria-controls="navbarNavMain" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNavMain">
+                <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
+                    <li class="nav-item">
+                        <a class="nav-link active" aria-current="page" href="{{ url_for('index') }}">Inicio</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/buscador">Buscador</a> 
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('about') }}">Acerca de</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('login') }}">Ingresar</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('contacto') }}">Contacto</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <header class="welcome-section text-center">
+        <div class="container">
+            <h1 class="display-4">Bienvenidos al proyecto de BigData</h1>
+            <p class="lead">Creado por XYZ como parte de un proyecto de clase</p>
+            <p class="lead">En la maestría de Analítica de Datos de la Universidad Central.</p>
+        </div>
+    </header>
+
+    <main class="container mt-4 mb-5">
+        <section id="gallery" class="gallery-container p-lg-4 p-md-3 p-2">
+            <h2 class="section-title mb-4">Explora Bogotá</h2>
+            <div id="bogotaCarousel" class="carousel slide carousel-fade" data-bs-ride="carousel">
+                <div class="carousel-indicators">
+                    {% for image_data in bogota_images %}
+                    <button type="button" data-bs-target="#bogotaCarousel" data-bs-slide-to="{{ loop.index0 }}" class="{{ 'active' if loop.first }}" aria-current="{{ 'true' if loop.first }}" aria-label="Slide {{ loop.index }}"></button>
+                    {% endfor %}
+                </div>
+                <div class="carousel-inner">
+                    {% if bogota_images %}
+                        {% for image_data in bogota_images %}
+                        <div class="carousel-item {{ 'active' if loop.first }}">
+                            <img src="{{ image_data.src }}" class="d-block w-100" alt="{{ image_data.alt }}">
+                            {% if image_data.caption_title or image_data.caption_text %}
+                            <div class="carousel-caption d-none d-md-block">
+                                <h5>{{ image_data.caption_title }}</h5>
+                                <p>{{ image_data.caption_text }}</p>
+                            </div>
+                            {% endif %}
+                        </div>
+                        {% endfor %}
+                    {% else %}
+                        <div class="carousel-item active">
+                           <img src="https://via.placeholder.com/1200x500.png?text=Añade+imágenes+de+Bogotá+en+static/images/" class="d-block w-100" alt="Placeholder Bogotá">
+                           <div class="carousel-caption d-none d-md-block">
+                               <h5>Imágenes Próximamente</h5>
+                               <p>Estamos trabajando en añadir hermosas vistas de Bogotá.</p>
+                           </div>
+                        </div>
+                    {% endif %}
+                </div>
+                <button class="carousel-control-prev" type="button" data-bs-target="#bogotaCarousel" data-bs-slide="prev">
+                    <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                    <span class="visually-hidden">Previous</span>
+                </button>
+                <button class="carousel-control-next" type="button" data-bs-target="#bogotaCarousel" data-bs-slide="next">
+                    <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                    <span class="visually-hidden">Next</span>
+                </button>
+            </div>
+        </section>
+
+        <section class="project-info-section py-5 mt-5">
+            <div class="container">
+                <h2 class="section-title">Sobre el Proyecto</h2>
+                <div class="row g-4">
+                    <div class="col-md-6">
+                        <div class="card h-100">
+                            <div class="card-body">
+                                <h5 class="card-title">Objetivo Principal</h5>
+                                <p class="card-text">Este proyecto tiene como fin aplicar los conocimientos adquiridos en Big Data para analizar [describe brevemente qué analiza tu proyecto]. Utilizamos herramientas como Flask, MongoDB y potencialmente Elasticsearch para la gestión y visualización de datos.</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="card h-100">
+                            <div class="card-body">
+                                <h5 class="card-title">Tecnologías Utilizadas</h5>
+                                <ul>
+                                    <li>Python (Flask)</li>
+                                    <li>MongoDB</li>
+                                    <li>Elasticsearch (si aplica)</li>
+                                    <li>HTML, CSS, JavaScript</li>
+                                    <li>Bootstrap 5</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer class="footer text-center">
+        <div class="container">
+            <p class="mb-1">&copy; <span id="current-year">{{ now().year }}</span> BigData-MiProyecto. Todos los derechos reservados.</p>
+            <p class="mb-1">
+                <a href="{{ creador }}" target="_blank" rel="noopener noreferrer">Desarrollado por XYZ (GitHub)</a> 
+                </p>
+            <p class="mb-1" id="version_app">{{ version }}</p>
+            <p class="mb-0 small text-muted">Página generada el: {{ now().strftime('%d de %B de %Y, %H:%M:%S') }}</p>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL" crossorigin="anonymous"></script>
+    </body>
+</html>
