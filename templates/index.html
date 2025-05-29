@@ -8,11 +8,28 @@
     <link href="{{ url_for('static', filename='css/landingPage.css') }}" rel="stylesheet">
 </head>
 <body>
-    <header class="header">
+        <header class="header">
+        <div class="container">
+            <div class="d-flex justify-content-between align-items-center">
+                <h1 class="h3 mb-0">BigData-MiProyecto</h1>
+                <nav>
+                    <ul class="nav">
+                        <li class="nav-item"><a class="nav-link" href="/">Inicio</a></li>
+                        <li class="nav-item"><a class="nav-link" href="/buscador">Buscador</a></li>
+                        <li class="nav-item"><a class="nav-link" href="/about">Acerca de</a></li>
+                        <li class="nav-item"><a class="nav-link" href="/login">Ingresar</a></li>
+                        <li class="nav-item"><a class="nav-link active" href="/contacto"><b>Contacto</b></a></li>
+                    </ul>
+                </nav>
+            </div>
+        </div>
+    </header>
+
+        
     <div class="container">
         <div class="row">
             <div class="col-md-6">
-                <div id="carouselExampleControls" class="carousel slide" data-bs-ride="carousel" data-bs-interval="1000">
+                <div id="carouselExampleControls" class="carousel slide" data-bs-ride="carousel" data-bs-interval="3000">
                     <div class="carousel-inner">
                         <div class="carousel-item active">
                             <img src="static/Images/imagen1.jpg" class="d-block w-100" alt="Imagen 1">
@@ -41,7 +58,7 @@
             <div class="col-md-6">
                 <h1 class="text-center">
                     Bienvenidos al proyecto de BigData<br> 
-                    creado por XYZ<br> 
+                    creado por Jesus Sanabria<br> 
                     como parte de <br>
                     un proyecto de clase<br> 
                     En la maestría de Analítica de Datos <br>
@@ -50,7 +67,7 @@
             </div>
         </div>
     </div>
-</header>
+
 
 
 
