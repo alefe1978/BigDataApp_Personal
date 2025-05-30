@@ -8,6 +8,8 @@ import json
 import re
 from elasticsearch import Elasticsearch
 
+
+
 app = Flask(__name__)
 #app.secret_key = 'BdIaGtA25_'  # Cambia esto por una clave secreta segura
 #app.secret_key = '$ucentral2025Lfcg#'  # Cambia esto por una clave secreta segura
@@ -62,18 +64,84 @@ def index():
 def about():
     return render_template('about.html', version=VERSION_APP,creador=CREATOR_APP)
 
+
+#--------------------------------
 @app.route('/contacto', methods=['GET', 'POST'])
 def contacto():
     if request.method == 'POST':
-        nombre = request.form['nombre']
-        email = request.form['email']
-        asunto = request.form['asunto']
+        # 1) Leer datos del formulario
+        nombre  = request.form['nombre']
+        email   = request.form['email']
+        asunto  = request.form['asunto']
         mensaje = request.form['mensaje']
 
-        return render_template('contacto.html',nombre=nombre, email=email, asunto=asunto, mensaje=mensaje)
-        # Aquí va la lógica para procesar el formulario de contacto
-        #return redirect(url_for('contacto'))
-    return render_template('contacto.html', version=VERSION_APP,creador=CREATOR_APP)
+        # 2) Conectar a MongoDB
+        client = connect_mongo()
+        if not client:
+            # error de conexión
+            return render_template('contacto.html',
+                                   error_message='No se pudo conectar a la base de datos. Intente más tarde.',
+                                   version=VERSION_APP, creador=CREATOR_APP)
+
+        db         = client['administracion']
+        contactos  = db['contactos']
+
+        try:
+            # 3) Validar unicidad de email (case-insensitive)
+            existe = contactos.find_one({
+                'email': {
+                    '$regex': f'^{re.escape(email)}$', 
+                    '$options': 'i'
+                }
+            })
+            if existe:
+                return render_template('contacto.html',
+                                       error_message='El correo ya existe en nuestra base de datos.',
+                                       version=VERSION_APP, creador=CREATOR_APP)
+
+            # 4) Preparar el documento para insertar
+            doc = {
+                'nombre':         nombre,
+                'email':          email,
+                'asunto':         asunto,
+                'mensaje':        mensaje,
+                'fecha_creacion': datetime.now()
+            }
+
+            # 5) Insertar en la colección
+            contactos.insert_one(doc)
+
+        except Exception as e:
+            return render_template('contacto.html',
+                                   error_message=f'Error al guardar el mensaje: {str(e)}',
+                                   version=VERSION_APP, creador=CREATOR_APP)
+        finally:
+            client.close()
+
+        # 6) Responder con mensaje de éxito
+        return render_template('contacto.html',
+                               success_message='¡Tu mensaje ha sido enviado exitosamente!',
+                               version=VERSION_APP, creador=CREATOR_APP)
+
+    # GET normal
+    return render_template('contacto.html',
+                           version=VERSION_APP, creador=CREATOR_APP)
+
+
+#------------------------------------------- 
+
+#@app.route('/contacto', methods=['GET', 'POST'])
+#def contacto():
+ #   if request.method == 'POST':
+  #      nombre = request.form['nombre']
+   #     email = request.form['email']
+    #    asunto = request.form['asunto']
+     #   mensaje = request.form['mensaje']
+
+      #  return render_template('contacto.html',nombre=nombre, email=email, asunto=asunto, mensaje=mensaje)
+       # # Aquí va la lógica para procesar el formulario de contacto
+        ##return redirect(url_for('contacto'))
+    #return render_template('contacto.html', version=VERSION_APP,creador=CREATOR_APP)
 
 
 @app.route('/login', methods=['GET', 'POST'])
