@@ -69,37 +69,22 @@ def about():
 @app.route('/contacto', methods=['GET', 'POST'])
 def contacto():
     if request.method == 'POST':
-        # 1) Leer datos del formulario
         nombre  = request.form['nombre']
         email   = request.form['email']
         asunto  = request.form['asunto']
         mensaje = request.form['mensaje']
 
-        # 2) Conectar a MongoDB
         client = connect_mongo()
         if not client:
-            # error de conexión
             return render_template('contacto.html',
                                    error_message='No se pudo conectar a la base de datos. Intente más tarde.',
                                    version=VERSION_APP, creador=CREATOR_APP)
 
-        db         = client['administracion']
-        contactos  = db['contactos']
+        db        = client['administracion']
+        contactos = db['contactos']
 
         try:
-            # 3) Validar unicidad de email (case-insensitive)
-            existe = contactos.find_one({
-                'email': {
-                    '$regex': f'^{re.escape(email)}$', 
-                    '$options': 'i'
-                }
-            })
-            if existe:
-                return render_template('contacto.html',
-                                       error_message='El correo ya existe en nuestra base de datos.',
-                                       version=VERSION_APP, creador=CREATOR_APP)
-
-            # 4) Preparar el documento para insertar
+            # Insertar siempre el nuevo documento
             doc = {
                 'nombre':         nombre,
                 'email':          email,
@@ -107,9 +92,16 @@ def contacto():
                 'mensaje':        mensaje,
                 'fecha_creacion': datetime.now()
             }
-
-            # 5) Insertar en la colección
             contactos.insert_one(doc)
+
+            # Recuperar todos los registros con ese email, ordenados por fecha_creacion descendente
+            duplicates_cursor = contactos.find({
+                'email': {
+                    '$regex': f'^{re.escape(email)}$',
+                    '$options': 'i'
+                }
+            }).sort('fecha_creacion', -1)
+            duplicates = list(duplicates_cursor)
 
         except Exception as e:
             return render_template('contacto.html',
@@ -118,14 +110,16 @@ def contacto():
         finally:
             client.close()
 
-        # 6) Responder con mensaje de éxito
+        # Renderizar con la lista de registros duplicados
         return render_template('contacto.html',
                                success_message='¡Tu mensaje ha sido enviado exitosamente!',
+                               duplicates=duplicates,
                                version=VERSION_APP, creador=CREATOR_APP)
 
-    # GET normal
+    # GET
     return render_template('contacto.html',
                            version=VERSION_APP, creador=CREATOR_APP)
+
 
 
 #------------------------------------------- 

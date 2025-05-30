@@ -61,6 +61,35 @@
                 <button type="submit" class="btn btn-primary">Enviar Mensaje</button>
             </div>
         </form>
+
+    {% if duplicates %}
+        <hr>
+        <h2 class="mt-4">Registros con el correo {{ request.form.email or '' }}</h2>
+        <div class="table-responsive">
+            <table class="table table-striped">
+            <thead>
+                <tr>
+                <th>Nombre</th>
+                <th>Email</th>
+                <th>Asunto</th>
+                <th>Mensaje</th>
+                <th>Fecha de Créación</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for reg in duplicates %}
+                <tr>
+                    <td>{{ reg.nombre }}</td>
+                    <td>{{ reg.email }}</td>
+                    <td>{{ reg.asunto }}</td>
+                    <td>{{ reg.mensaje }}</td>
+                    <td>{{ reg.fecha_creacion.strftime('%Y-%m-%d %H:%M:%S') }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+            </table>
+        </div>
+        {% endif %}
     </div>
 
     <footer class="text-center">
