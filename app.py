@@ -51,10 +51,10 @@ def connect_mongo():
 
 # Configuración de Elasticsearch
 client = Elasticsearch(
-    "https://indexprueba-cb87f3.es.us-east-1.aws.elastic.cloud:443",
-    api_key="Q3VEYy1KWUJHdDB6RGdJR3gyc0g6cThLVzhJZS05eGxta0Q0NXQxTHYxZw=="
+    "https://52a7b2b3816344c788c2062f273dc73f.us-central1.gcp.cloud.es.io:443",
+    api_key="OFhhOVFwY0JydWxkR0J1UUFIX2o6aWJlQ01hRGhMeUlNVE5VWGhHWWZhZw=="
 )
-INDEX_NAME = "ucentral_test"
+INDEX_NAME = "bigdata-personal-25"
 
 @app.route('/')
 def index():
