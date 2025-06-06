@@ -609,110 +609,139 @@ def elastic_eliminar_documento():
 def buscador():
     if request.method == 'POST':
         try:
-            # Obtener los parámetros del formulario
-            search_type = request.form.get('search_type')
-            search_text = request.form.get('search_text')
-            fecha_desde = request.form.get('fecha_desde')
-            fecha_hasta = request.form.get('fecha_hasta')
+            search_type = request.form.get('search_type', 'texto')
+            search_text = request.form.get('search_text', '')
+            fecha_desde = request.form.get('fecha_desde') or "1500-01-01"
+            fecha_hasta = request.form.get('fecha_hasta') or datetime.now().strftime("%Y-%m-%d")
+            categorias = request.form.getlist('categoria')
+            clasificaciones = request.form.getlist('clasificacion')
+            fechas = request.form.getlist('fecha')  # <- Capturar años seleccionados
 
-            # Establecer fechas por defecto si están vacías
-            if not fecha_desde:
-                fecha_desde = "1500-01-01"
-            if not fecha_hasta:
-                fecha_hasta = datetime.now().strftime("%Y-%m-%d")
-
-            # Construir la consulta base
             query = {
-                "query": {
-                    "bool": {
-                        "must": []
-                    }
-                },
-                "aggs": {
-                    "categoria": {
-                        "terms": {
-                            "field": "categoria",
-                            "size": 10,
-                            "order": {"_key": "asc"}
+                    "size": 100,  # 🔥 Mostrar hasta 100 resultados
+                    "query": {
+                        "bool": {
+                            "must": [],
+                            "filter": []
                         }
                     },
-                    "clasificacion": {
-                        "terms": {
-                            "field": "clasificacion",
-                            "size": 10,
-                            "order": {"_key": "asc"}
-                        }
-                    },
-                    "Fecha": {
-                        "date_histogram": {
-                            "field": "fecha",
-                            "calendar_interval": "year",
-                            "format": "yyyy"
-                        }
-                    }
-                }
-            }
-
-            # Agregar condición de búsqueda según el tipo
-            if search_type == 'texto':
-                query["query"]["bool"]["must"].extend([
-                    {
-                        "match_phrase": {
-                            "texto": {
-                                "query": search_text,
-                                "slop": 1
+                    "aggs": {
+                        "categoria": {
+                            "terms": {
+                                "field": "categoria",
+                                "size": 100,
+                                "order": {"_key": "asc"}
+                            }
+                        },
+                        "clasificacion": {
+                            "terms": {
+                                "field": "clasificacion",
+                                "size": 100,
+                                "order": {"_key": "asc"}
+                            }
+                        },
+                        "fecha": {
+                            "date_histogram": {
+                                "field": "fecha",
+                                "calendar_interval": "year",
+                                "format": "yyyy"
                             }
                         }
                     }
-                ])
-            else:           #si no es una búsqueda por texto
-                search_text='*'+search_text+'*'
-                query["query"]["bool"]["must"].append(
-                    {"match": {search_type: search_text}}
-                )
+                }
 
-            # Agregar rango de fechas
-            range_query = {
+            if search_type == 'texto':
+                query["query"]["bool"]["must"].append({
+                    "match_phrase": {
+                        "texto": {
+                            "query": search_text,
+                            "slop": 1
+                        }
+                    }
+                })
+            elif search_type in ['titulo', 'autor']:
+                query["query"]["bool"]["must"].append({
+                    "match_phrase": {
+                        search_type: {
+                            "query": search_text,
+                            "slop": 1
+                        }
+                    }
+                })
+            elif search_type == 'categoria':
+                query["query"]["bool"]["must"].append({
+                    "term": {
+                        "categoria.keyword": search_text  # Asegúrate que en el mapeo exista un subcampo `.keyword`
+                    }
+                })
+
+            # Rango global de fechas
+            query["query"]["bool"]["filter"].append({
                 "range": {
                     "fecha": {
-                        "format": "yyyy-MM-dd",
                         "gte": fecha_desde,
-                        "lte": fecha_hasta
+                        "lte": fecha_hasta,
+                        "format": "yyyy-MM-dd"
                     }
                 }
-            }
-            query["query"]["bool"]["must"].append(range_query)
+            })
 
-            # Ejecutar la búsqueda en Elasticsearch
-            response = client.search(
-                index=INDEX_NAME,
-                body=query
-            )
+            # Filtros de año seleccionados
+            if fechas:
+                should_ranges = []
+                for año in fechas:
+                    should_ranges.append({
+                        "range": {
+                            "fecha": {
+                                "gte": f"{año}-01-01",
+                                "lte": f"{año}-12-31",
+                                "format": "yyyy-MM-dd"
+                            }
+                        }
+                    })
+                query["query"]["bool"]["filter"].append({
+                    "bool": {
+                        "should": should_ranges
+                    }
+                })
 
-            # Preparar los resultados para la plantilla
-            hits         = response['hits']['hits']
-            aggregations = response['aggregations']
+            # Filtros de texto
+            if categorias:
+                query["query"]["bool"]["filter"].append({"terms": {"categoria": categorias}})
+            if clasificaciones:
+                query["query"]["bool"]["filter"].append({"terms": {"clasificacion": clasificaciones}})
+
+            response = client.search(index=INDEX_NAME, body=query)
+            hits = response['hits']['hits']
+            aggregations = response.get('aggregations', {})
 
             return render_template('buscador.html',
-                                version=VERSION_APP,
-                                creador=CREATOR_APP,
-                                hits=hits,
-                                aggregations=aggregations,
-                                search_type=search_type,
-                                search_text=search_text,
-                                fecha_desde=fecha_desde,
-                                fecha_hasta=fecha_hasta,
-                                query=query)
-        
+                                   hits=hits,
+                                   aggregations=aggregations,
+                                   search_text=search_text,
+                                   search_type=search_type,
+                                   fecha_desde=fecha_desde,
+                                   fecha_hasta=fecha_hasta,
+                                   version=VERSION_APP,
+                                   creador=CREATOR_APP,
+                                   query=query)
         except Exception as e:
             return render_template('buscador.html',
-                                version=VERSION_APP,
-                                creador=CREATOR_APP,
-                                error_message=f'Error en la búsqueda: {str(e)}')
-    
+                                   error_message=f'Error en la búsqueda: {str(e)}',
+                                   version=VERSION_APP,
+                                   creador=CREATOR_APP)
+
+    # GET default
     return render_template('buscador.html',
-                        version=VERSION_APP,
-                        creador=CREATOR_APP)
+                           version=VERSION_APP,
+                           creador=CREATOR_APP,
+                           aggregations={},
+                           hits=[],
+                           search_text='',
+                           search_type='texto',
+                           fecha_desde='1500-01-01',
+                           fecha_hasta=datetime.now().strftime('%Y-%m-%d'))
+
 
 @app.route('/api/search', methods=['POST'])
 def search():
