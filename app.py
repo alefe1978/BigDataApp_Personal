@@ -11,9 +11,7 @@ from elasticsearch import Elasticsearch
 
 
 app = Flask(__name__)
-#app.secret_key = 'BdIaGtA25_'  # Cambia esto por una clave secreta segura
-#app.secret_key = '$ucentral2025Lfcg#'  # Cambia esto por una clave secreta segura
-
+# Configuración de la aplicación Flask
 #Para llevar el secreto de la app desde las variables de entorno como recomendacion de seguridad
 if not app.secret_key:
     app.secret_key = '$ucentral2025Lfcg#'
@@ -31,10 +29,6 @@ CREATOR_APP = "https://github.com/alefe1978/BigDataApp_Personal"
 mongo_uri   = os.environ.get("MONGO_URI")
 
 if not mongo_uri:
-    #uri = "mongodb+srv://DbCentral:DbCentral2025@cluster0.vhltza7.mongodb.net/?appName=Cluster0"
-    #uri         = "mongodb+srv://ambiente:BdIaGtA25_@cluster0.xjrq8tt.mongodb.net/administracion?retryWrites=true&w=majority"
-    # mongodb+srv://DbCentral:DbCentral2025@cluster0.vhltza7.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0"
-    #uri         = "mongodb+srv://dbambiente:dbambiente@cluster0.xjrq8tt.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0"
     uri = "mongodb+srv://dbambiente:dbambiente@cluster0.xjrq8tt.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0"
     mongo_uri   = uri
 
@@ -123,20 +117,6 @@ def contacto():
 
 
 #------------------------------------------- 
-
-#@app.route('/contacto', methods=['GET', 'POST'])
-#def contacto():
- #   if request.method == 'POST':
-  #      nombre = request.form['nombre']
-   #     email = request.form['email']
-    #    asunto = request.form['asunto']
-     #   mensaje = request.form['mensaje']
-
-      #  return render_template('contacto.html',nombre=nombre, email=email, asunto=asunto, mensaje=mensaje)
-       # # Aquí va la lógica para procesar el formulario de contacto
-        ##return redirect(url_for('contacto'))
-    #return render_template('contacto.html', version=VERSION_APP,creador=CREATOR_APP)
-
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
@@ -738,7 +718,7 @@ def buscador():
 def search():
     try:
         data = request.get_json()
-        index_name = data.get('index', 'ucentral_test')
+        index_name = data.get('index', 'bigdata-personal-25')
         query = data.get('query')
 
         # Ejecutar la búsqueda en Elasticsearch
